@@ -1,24 +1,31 @@
-﻿namespace SatisfactorySaveEditorReloaded
+﻿using System.Diagnostics;
+
+namespace SatisfactorySaveEditorReloaded
 {
     public partial class MainPage : ContentPage
     {
-        int count = 0;
-
+        Grid treeGrid;
         public MainPage()
         {
             InitializeComponent();
+            treeGrid = TreeView.CreateTreeView(MainGrid);
+            MainGrid.Add(treeGrid,1);
+            
         }
-
-        private void OnCounterClicked(object sender, EventArgs e)
+        public void OnButtonClicked(object sender, EventArgs e)
         {
-            count++;
-
-            if (count == 1)
-                CounterBtn.Text = $"Clicked {count} time";
-            else
-                CounterBtn.Text = $"Clicked {count} times";
-
-            SemanticScreenReader.Announce(CounterBtn.Text);
+            TreeView.AddTreeViewEntry(treeGrid, (int)Math.Round(slider.Value,0), node_name.Text);
+        }
+        public void OnValueChanged(object sender, EventArgs e)
+        {
+            if(sender == slider)
+            {
+                ToolTipProperties.SetText(slider, slider.Value.ToString());
+                double val = slider.Value % 1;
+                double adjustment = val < 2.5 ? -val : 5 - val;
+                slider.Value += adjustment;
+                Slider_Value.Text = slider.Value.ToString();
+            }
         }
     }
 
