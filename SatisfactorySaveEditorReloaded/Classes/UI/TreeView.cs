@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -9,19 +10,21 @@ namespace SatisfactorySaveEditorReloaded.Classes.UI
 {
     internal class TreeView
     {
+        //row height definition for all rows of the treeview
+        static GridLength rowHeight = new GridLength(24, GridUnitType.Absolute);
         public static Grid CreateTreeView(Grid mainGrid)
         {
             Grid treeGrid = new Grid
             {
                 RowDefinitions =
                 {
-                    new RowDefinition { Height = new GridLength(36, GridUnitType.Absolute) }
+                    new RowDefinition { Height = rowHeight }
                 },
                 ColumnDefinitions =
                 {
-                    new ColumnDefinition {Width = new GridLength(36, GridUnitType.Absolute)},
-                    new ColumnDefinition {Width = new GridLength(1, GridUnitType.Star) },
-                    new ColumnDefinition {Width = new GridLength (7.5, GridUnitType.Star) }
+                    new ColumnDefinition {Width = rowHeight}, //column for the button
+                    new ColumnDefinition {Width = new GridLength(1, GridUnitType.Star) }, //column for showing the depth
+                    new ColumnDefinition {Width = new GridLength (7.5, GridUnitType.Star) } //column for the name
                 }
                 
             };
@@ -55,19 +58,22 @@ namespace SatisfactorySaveEditorReloaded.Classes.UI
                     }
                 }
             }
-            Button button = new Button { Text = "+", VerticalOptions=LayoutOptions.Center, HorizontalOptions = LayoutOptions.Center ,StyleId = (level+1).ToString() };
+            Button button = new Button { Text = "-", VerticalOptions = LayoutOptions.Center, HorizontalOptions = LayoutOptions.Center, StyleId = (level + 1).ToString(), Padding = 0, 
+            MaximumHeightRequest = 24, MaximumWidthRequest = 24, MinimumHeightRequest = 24, MinimumWidthRequest = 24, TextColor = Color.FromRgba("#ffffff"), CornerRadius = 0,
+            FontSize = 15, FontAttributes = FontAttributes.Bold};
             button.Clicked += (sender, args) => CollapseTreeNode(treeView, sender);
 
+
             Label depthLabel = new Label { Text = level.ToString(), HorizontalTextAlignment = TextAlignment.Center, VerticalTextAlignment = TextAlignment.Center };
-            Border depthBorder = new Border { Stroke = Brush.White, StrokeThickness = 1 };
+            Border depthBorder = new Border { Stroke = Brush.White, StrokeThickness = 0.5 };
 
             Label nameLabel = new Label { Text = name, HorizontalTextAlignment = TextAlignment.Center, VerticalTextAlignment = TextAlignment.Center, StyleId = "NodeName" };
-            Border nameBorder = new Border { Stroke = Brush.White, StrokeThickness = 1, StyleId = "NodeName" };
+            Border nameBorder = new Border { Stroke = Brush.White, StrokeThickness = 0.5, StyleId = "NodeName" };
 
             int newRowIndex = treeView.RowDefinitions.Count-1;
             int colIndex = treeView.ColumnDefinitions.Count-1;
 
-            treeView.RowDefinitions.Add(new RowDefinition { Height = new GridLength(48, GridUnitType.Absolute) });
+            treeView.RowDefinitions.Add(new RowDefinition { Height = rowHeight });
             treeView.Add(button, 0, newRowIndex);
             treeView.Add(depthLabel, 1 + level, newRowIndex);
             treeView.Add(depthBorder, 1 + level, newRowIndex);
@@ -82,7 +88,7 @@ namespace SatisfactorySaveEditorReloaded.Classes.UI
             if(sender is Button)
             {
                 Button button = (Button)sender;
-                if(button.Text == "+")
+                if(button.Text == "-")
                 {
                     int senderDepth = 0;
                     if (sender is IView)
@@ -94,38 +100,50 @@ namespace SatisfactorySaveEditorReloaded.Classes.UI
                         if(child is Button)
                         {
                             Button bChild = (Button)child;
-                            if (int.Parse(bChild.StyleId) > senderDepth)
+                            if (int.Parse(bChild.StyleId) > senderDepth && treeView.GetRow(child) > treeView.GetRow((IView)sender))
                             {
                                 int row = treeView.GetRow(child);
-                                bChild.Text = "-";
+                                if(int.Parse(bChild.StyleId) != senderDepth)
+                                {
+                                    bChild.Text = "-";
+                                }
                                 treeView.RowDefinitions[row] = new RowDefinition { Height = new GridLength(0, GridUnitType.Absolute) };
                             }
+                            else if (int.Parse(bChild.StyleId) <= senderDepth && treeView.GetRow(child) > treeView.GetRow((IView)sender)){ break; }
                         }
                     }
-                    button.Text = "-";
+                    button.Text = "+";
                 }
-                else if (button.Text == "-")
+                else if (button.Text == "+")
                 {
                     int senderDepth = 0;
+                    int senderRow = 0;
+                    int prevLevel = 100;
                     if (sender is IView)
                     {
                         senderDepth = int.Parse(button.StyleId);
+                        senderRow = treeView.GetRow(button);
                     }
                     foreach (IView child in treeView.Children)
                     {
                         if (child is Button)
                         {
                             Button bChild = (Button)child;
-                            if (int.Parse(bChild.StyleId) == senderDepth+1)
+                            if (treeView.GetRow(child) > senderRow && int.Parse(bChild.StyleId) >= senderDepth && int.Parse(bChild.StyleId) <= prevLevel)
                             {
                                 int row = treeView.GetRow(child);
-                                bChild.Text = "-";
-                                treeView.RowDefinitions[row] = new RowDefinition { Height = new GridLength(0, GridUnitType.Absolute) };
+                                prevLevel = int.Parse(bChild.StyleId);
+                                if (int.Parse(bChild.StyleId) != senderDepth)
+                                {
+                                    bChild.Text = "+";
+                                }      
+                                treeView.RowDefinitions[row] = new RowDefinition { Height = rowHeight };
                             }
+                            else if (int.Parse(bChild.StyleId) <= senderDepth && treeView.GetRow(child) > treeView.GetRow((IView)sender)) { break; }
                         }
 
                     }
-                    button.Text="+";
+                    button.Text="-";
                 }
             }   
         }
