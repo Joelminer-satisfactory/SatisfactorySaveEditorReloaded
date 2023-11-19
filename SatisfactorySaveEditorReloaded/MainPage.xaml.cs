@@ -11,21 +11,15 @@ namespace SatisfactorySaveEditorReloaded
             treeGrid = TreeView.CreateTreeView(MainGrid);
             MainGrid.Add(treeGrid,1);
             
-        }
-        public void OnButtonClicked(object sender, EventArgs e)
-        {
-            TreeView.AddTreeViewEntry(treeGrid, (int)Math.Round(slider.Value,0), node_name.Text);
-        }
-        public void OnValueChanged(object sender, EventArgs e)
-        {
-            if(sender == slider)
+            for (int x = 1; x < MainGrid.ColumnDefinitions.Count-1; x++)
             {
-                ToolTipProperties.SetText(slider, slider.Value.ToString());
-                double val = slider.Value % 1;
-                double adjustment = val < 2.5 ? -val : 5 - val;
-                slider.Value += adjustment;
-                Slider_Value.Text = slider.Value.ToString();
+                for (int y = 0; y < MainGrid.RowDefinitions.Count; y++)
+                {
+                    Border border = new Border { Stroke = Color.FromArgb("#ffffff"), StrokeThickness = 0.5};
+                    MainGrid.Add(border, x, y);
+                }
             }
+
         }
     }
 

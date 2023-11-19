@@ -61,7 +61,9 @@ namespace SatisfactorySaveEditorReloaded.Classes.UI
             Button button = new Button { Text = "-", VerticalOptions = LayoutOptions.Center, HorizontalOptions = LayoutOptions.Center, StyleId = (level + 1).ToString(), Padding = 0, 
             MaximumHeightRequest = 24, MaximumWidthRequest = 24, MinimumHeightRequest = 24, MinimumWidthRequest = 24, TextColor = Color.FromRgba("#ffffff"), CornerRadius = 0,
             FontSize = 15, FontAttributes = FontAttributes.Bold};
+#pragma warning disable CS8604 // Possible null reference argument.
             button.Clicked += (sender, args) => CollapseTreeNode(treeView, sender);
+#pragma warning restore CS8604 // Possible null reference argument.
 
 
             Label depthLabel = new Label { Text = level.ToString(), HorizontalTextAlignment = TextAlignment.Center, VerticalTextAlignment = TextAlignment.Center };
